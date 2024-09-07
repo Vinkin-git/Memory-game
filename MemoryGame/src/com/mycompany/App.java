@@ -4,51 +4,62 @@ import java.util.Scanner;
 
 public class App {
 
-	public static void main(String[] args) {
-		Scanner in = new Scanner(System.in);
-		int player1 = 0, player2 = 0, size = 4;
-		Game game = new Game(size);
-		
-		while(true){
-			game.Gen();
-			game.print();
-			
-			System.out.println("1 - Player X Player \n 2 - Player X Com");
-			
-			int op = in.nextInt();
-			switch(op) {
-				case 1:{
-						while(player1 + player2 <= (size * size) / 2) {
-							int a, b, c, d;
-							System.out.println("Player 1:");
-							System.out.println("Jogada 1:");
-							a = in.nextInt();
-							b = in.nextInt();
-							System.out.println("Jogada 2:");
-							c = in.nextInt();
-							d = in.nextInt();
-							if(game.play(game.fourToOne(a, b, c, d))) player1 += 1;
-							
-							System.out.println("Player 2:");
-							System.out.println("Jogada 1:");
-							a = in.nextInt();
-							b = in.nextInt();
-							System.out.println("Jogada 2:");
-							c = in.nextInt();
-							d = in.nextInt();
-							
-							if(game.play(game.fourToOne(a, b, c, d))) player2 += 1;
-						}
-					}
-					break;
-				case 2:
-					break;
-					
-				default:
-					break;
-			}
-					
-			}
-	}
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int player1 = 0, player2 = 0, size = 4;
+        Game game = new Game(size);
+        IA bot = new IA(size);
+        
+        game.Gen();
+        game.print();
+        
+        System.out.println("1 - Player X Player\n2 - Player X Com");
+        int op = in.nextInt();
 
+        switch (op) {
+            case 1: {
+                while (player1 + player2 < (size * size) / 2) {
+                    System.out.println("Player 1:");
+                    while(true) {
+                    	if (game.play(bot)) player1++;
+                    	else break;
+                    }
+
+                    System.out.println("Player 2:");
+                    while(true) {
+                    	if (game.play(bot)) player2++;
+                    	else break;
+                    }
+                }
+
+                if (player1 > player2) System.out.println("Player One Wins!!!");
+                else if (player1 == player2) System.out.println("Draw!!!");
+                else System.out.println("Player Zero Two Wins!!!");
+            }
+            break;
+            case 2: {
+                while (player1 + player2 < (size * size) / 2) {
+                    System.out.println("Player 1:");
+                    while(true) {
+                    	if (game.play(bot)) player1++;
+                    	else break;
+                    }
+
+                    System.out.println("Com:");
+                    while(true) {
+                    	if (game.play(bot, bot.play())) player2++;
+                    	else break;
+                    }
+                }
+
+                if (player1 > player2) System.out.println("Player One Wins!!!");
+                else if (player1 == player2) System.out.println("Draw!!!");
+                else System.out.println("... .. YOUUUUUuuUUUU ... LOOOOSEeeeE!!!");
+                
+            }
+            break;
+        }
+        
+        in.close(); 
+    }
 }

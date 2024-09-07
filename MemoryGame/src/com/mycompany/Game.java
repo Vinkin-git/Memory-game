@@ -6,13 +6,8 @@ import java.util.Scanner;
 
 public class Game {
     int tam;
-    int Grid[][];
-    boolean GridB[][];
-    
-    public int[] fourToOne(int x, int y,  int x2, int y2) { 
-    	int ans[] = {x, y, x2, y2};
-    	return ans;
-    }
+    int[][] Grid;
+    boolean[][] GridB;
 
     Game(int x) {
         this.tam = x;
@@ -21,14 +16,14 @@ public class Game {
     }
 
     public void clearConsole() {
-        // Este método é opcional e pode não funcionar em IDEs.
+        // Método para limpar o console, pode não funcionar em IDEs.
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
     public void print() {
         clearConsole();
-
+        System.out.print("\n");
         for (int i = 0; i < tam; ++i) {
             for (int j = 0; j < tam; ++j) {
                 if (GridB[i][j])
@@ -38,20 +33,21 @@ public class Game {
             }
             System.out.println();
         }
+        
+        System.out.println("\n");
     }
 
     public void Gen() {
         ArrayList<Position> positions = new ArrayList<>();
-        for (int i = 0; i < tam; ++i)
+        for (int i = 0; i < tam; ++i) {
             for (int j = 0; j < tam; ++j) {
                 positions.add(new Position(i, j));
             }
+        }
 
         Random rand = new Random();
-
         for (int i = 0; i < tam * tam / 2; ++i) {
             int pos1, pos2;
-
             do {
                 pos1 = rand.nextInt(positions.size());
             } while (positions.get(pos1).gen);
@@ -72,15 +68,43 @@ public class Game {
         return Grid[x][y];
     }
 
-    public boolean play(int[] coodern) {
+    public boolean play(IA bot, int[] coords) {
+        GridB[coords[0]][coords[1]] = true;
+        bot.savePosition(coords[0], coords[1], Grid[coords[0]][coords[1]]);
+        print();
 
-        
+        GridB[coords[2]][coords[3]] = true;
+        bot.savePosition(coords[2], coords[3], Grid[coords[2]][coords[3]]);
+        print();
+
+        boolean match = play(coords[0], coords[1]) == play(coords[2], coords[3]);
+        if (!match) {
+            System.out.println("Não deu Match! >-<");
+            GridB[coords[0]][coords[1]] = false;
+            GridB[coords[2]][coords[3]] = false;
+        } else {
+            System.out.println("Match! ^-^");
+            bot.setFoud(Grid[coords[0]][coords[1]]);
+        }
+
+        print();
+        return match;
+    }
+
+    public boolean play(IA bot) {
+        Scanner in = new Scanner(System.in);
+        int[] coords = new int[4];
+
+        // Primeiro par de coordenadas
         while (true) {
             System.out.println("Coordenada da primeira carta (formato: x y):");
+            coords[0] = in.nextInt();
+            coords[1] = in.nextInt();
 
-            if (coodern[0] >= 0 && coodern[0] < tam && coodern[1]>= 0 && 
-            	coodern[1] < tam && !GridB[coodern[0]][coodern[1]]) {
-                GridB[coodern[0]][coodern[1]] = true;
+            if (coords[0] >= 0 && coords[0] < tam && coords[1] >= 0 &&
+                coords[1] < tam && !GridB[coords[0]][coords[1]]) {
+                GridB[coords[0]][coords[1]] = true;
+                bot.savePosition(coords[0], coords[1], Grid[coords[0]][coords[1]]);
                 break;
             } else {
                 System.out.println("Tente novamente. ~_~.");
@@ -89,34 +113,37 @@ public class Game {
 
         print();
 
-
+        // Segundo par de coordenadas
         while (true) {
             System.out.println("Coordenada da segunda carta (formato: x y):");
+            coords[2] = in.nextInt();
+            coords[3] = in.nextInt();
 
-            if (coodern[2] >= 0 && coodern[2] < tam && 
-            	coodern[3] >= 0 && coodern[3] < tam && 
-            	!GridB[coodern[2]][coodern[3]] && 
-            	!(coodern[0] == coodern[2] && coodern[1] == coodern[3])) {
+            if (coords[2] >= 0 && coords[2] < tam &&
+                coords[3] >= 0 && coords[3] < tam &&
+                !GridB[coords[2]][coords[3]] &&
+                !(coords[0] == coords[2] && coords[1] == coords[3])) {
+                GridB[coords[2]][coords[3]] = true;
+                bot.savePosition(coords[2], coords[3], Grid[coords[2]][coords[3]]);
                 break;
             } else {
                 System.out.println("Tente novamente. ~_~");
             }
         }
 
-        GridB[coodern[2]][coodern[3]] = true;
         print();
 
-        boolean Match = play(coodern[0], coodern[1]) == play(coodern[2], coodern[3]);
-        if (!Match) {
+        boolean match = play(coords[0], coords[1]) == play(coords[2], coords[3]);
+        if (!match) {
             System.out.println("Não deu Match! >-<");
-            GridB[coodern[0]][coodern[1]] = false;
-            GridB[coodern[2]][coodern[3]] = false;
+            GridB[coords[0]][coords[1]] = false;
+            GridB[coords[2]][coords[3]] = false;
         } else {
             System.out.println("Match! ^-^");
+            bot.setFoud(Grid[coords[2]][coords[3]]);
         }
 
         print();
-
-        return Match;
+        return match;
     }
 }
